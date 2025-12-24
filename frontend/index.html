@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live CNN Camera</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Live CNN Classification (Webcam)</h1>
+    <img src="{{ url_for('video') }}" width="640" height="480">
+</body>
+</html>
