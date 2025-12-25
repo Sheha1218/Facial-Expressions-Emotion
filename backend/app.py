@@ -1,20 +1,20 @@
-from fastapi import FastAPI,Response,render_template
-from flask_cors import CORS
+from fastapi import FastAPI,Response,Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 import torch
 import cv2
 import numpy as np
-
-from detector import classifire
+from backend.detector import classifire
 
 
 
 CLASS_NAMES = ['angry','confused','disgust','fear','happy','neutral','sad','shy','suprise']
 
-app = FastAPI(__name__)
-CORS(app)
+app = FastAPI()
+frontend = Jinja2Templates(directory='frontend')
 
 
-classifire = classifire('D:\Way to Denmark\Projects\Facial-Expressions-Emotion\model\model.pth',CLASS_NAMES)
+classifire = classifire(r'D:\Way to Denmark\Projects\Facial-Expressions-Emotion\model\model.pth',CLASS_NAMES)
 
 cap =cv2.VideoCapture(0)
 
@@ -48,14 +48,19 @@ def generate_frame():
               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
 
-@app.route('/')
-def index():
-    return render_template('frontend\index.html')
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return frontend.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
 
-@app.route('/video')
+@app.get("/video")
 def video():
-    return Response(generate_frame(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(
+        generate_frame(),
+        media_type="multipart/x-mixed-replace; boundary=frame"
+    )
     
 if __name__ == '__main__':
     app.run(host='5000',debug=True)
